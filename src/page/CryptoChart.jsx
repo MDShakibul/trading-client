@@ -14,6 +14,8 @@ import { useEffect, useRef, useState, useTransition } from 'react';
 import Chart from 'react-apexcharts';
 import Swal from 'sweetalert2';
 import { useStockBuySellMutation } from '../redux/api/apiSlice';
+import { isNotHaveEnoughBalance, showAmountFormatted } from '../utils';
+import { useSelector } from 'react-redux';
 
 const TradingChart = () => {
 	const [series, setSeries] = useState([{ data: [] }]);
@@ -26,6 +28,12 @@ const TradingChart = () => {
 	const [amount, setAmount] = useState('');
 	const [open, setOpen] = useState(false);
 	const [showErrorMessage, setShowErrorMessage] = useState(false);
+	const [showErrorMessageForBalanec, setShowErrorMessageForBalanec] = useState(false);
+
+
+
+	// User information
+	const userInfo = useSelector((state) => state.userInfo.userInformation); 
 
 	// Fetch available trading pairs
 	useEffect(() => {
@@ -68,7 +76,7 @@ const TradingChart = () => {
 	}, [symbol, intervals]);
 
 	// WebSocket for real-time price updates
-	/* useEffect(() => {
+	useEffect(() => {
     const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol}@trade`);
   
     ws.binaryType = "arraybuffer"; // Improve WebSocket performance
@@ -84,66 +92,8 @@ const TradingChart = () => {
     return () => {
       ws.close();
     };
-  }, [symbol]); */
+  }, [symbol]);
 
-	const wsRefs = useRef({});
-	const reconnectTimeouts = useRef({});
-	const [isPending, startTransition] = useTransition();
-
-	useEffect(() => {
-		connectWebSocket(symbol);
-
-		return () => {
-			if (wsRefs.current[symbol]) {
-				wsRefs.current[symbol].close(); // Cleanup WebSocket on unmount
-			}
-		};
-	}, [symbol]);
-
-	const connectWebSocket = (symbol) => {
-		if (wsRefs.current[symbol]) {
-			wsRefs.current[symbol].close(); // Close existing connection before opening a new one
-		}
-
-		const ws = new WebSocket(
-			`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@trade`
-		);
-
-		ws.onopen = () => console.log(`✅ WebSocket connected: ${symbol}`);
-
-		ws.onmessage = (event) => {
-			try {
-				const data = JSON.parse(event.data);
-				if (data.p) {
-					startTransition(() => {
-						setCurrentRate(parseFloat(data.p));
-					});
-				}
-			} catch (error) {
-				console.error(`❌ Error parsing WebSocket data for ${symbol}:`, error);
-			}
-		};
-
-		ws.onerror = (error) => {
-			console.error(`❌ WebSocket error for ${symbol}:`, error);
-			reconnectWebSocket(symbol);
-		};
-
-		ws.onclose = (event) => {
-			console.log(`🔴 WebSocket closed: ${symbol}, Reason: ${event.reason}`);
-			reconnectWebSocket(symbol);
-		};
-
-		wsRefs.current[symbol] = ws;
-	};
-
-	const reconnectWebSocket = (symbol) => {
-		clearTimeout(reconnectTimeouts.current[symbol]);
-		reconnectTimeouts.current[symbol] = setTimeout(
-			() => connectWebSocket(symbol),
-			3000
-		); // Reconnect after 3s
-	};
 
 	// WebSocket for real-time updates
 	useEffect(() => {
@@ -190,6 +140,7 @@ const TradingChart = () => {
 	const handleBuySellClick = (type) => {
 		setModalType(type);
 		setOpen(!open);
+		setAmount("");
 	};
 
 	const [stockBuySell, { isLoading, isError, isSuccess }] =
@@ -197,6 +148,11 @@ const TradingChart = () => {
 	const handleConfirm = async () => {
 		if (!amount) {
 			setShowErrorMessage(true);
+			return;
+		}
+
+		if(isNotHaveEnoughBalance(userInfo?.acc_balance, parseFloat(amount))){
+			setShowErrorMessageForBalanec(true);
 			return;
 		}
 
@@ -249,8 +205,6 @@ const TradingChart = () => {
 		series[0]?.data?.length > 0
 			? series[0].data[series[0].data.length - 1].y[3]
 			: currentRate;
-	/* console.log(lastPrice)
-console.log(series[0]?.data[series[0].data.length - 1]) */
 
 	const isPriceDropping = lastPrice > currentRate;
 
@@ -301,7 +255,11 @@ console.log(series[0]?.data[series[0].data.length - 1]) */
 		<div
 			style={{ background: '#0f172a', padding: '20px', borderRadius: '10px' }}
 		>
-			<h2 style={{ color: '#ffffff' }}>Real-Time Trading Chart</h2>
+		<div className='flex justify-between mb-3'>
+
+			<h2 className='text-white text-2xl'>Real-Time Trading Chart</h2>
+			<h2 className='text-white text-2xl'>Total Balance: {showAmountFormatted(userInfo?.acc_balance)}</h2>
+		</div>
 
 			<select
 				onChange={(e) => {
@@ -376,6 +334,7 @@ console.log(series[0]?.data[series[0].data.length - 1]) */
 					<Typography variant="h4" color="blue-gray">
 						{modalType === 'buy' ? 'Buy' : 'Sell'} {symbol.toUpperCase()}
 					</Typography>
+					
 					<Typography className="mt-1 font-normal text-gray-600">
 						Current Rate:{' '}
 						<strong
@@ -419,10 +378,14 @@ console.log(series[0]?.data[series[0].data.length - 1]) */
 							onChange={(e) => {
 								setAmount(e.target.value);
 								setShowErrorMessage(false);
+								setShowErrorMessageForBalanec(false);
 							}}
 						/>
 						{showErrorMessage ? (
 							<small className="text-red-600">Expense required</small>
+						) : null}
+						{showErrorMessageForBalanec ? (
+							<small className="text-red-600">Not have enough balance for expenses</small>
 						) : null}
 					</div>
 				</DialogBody>

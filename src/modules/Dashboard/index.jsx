@@ -1,15 +1,32 @@
+/* eslint-disable no-unused-vars */
 import { ChartCandlestick, Home, LogOut, Menu } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useAppDispatch } from '../../redux/hook';
 import { logout } from '../../redux/features/auth/authSlice';
+import { useSelector } from 'react-redux';
+import { useGetUserInfoQuery } from '../../redux/api/apiSlice';
+import { userInformation } from '../../redux/features/userInformation/userInformationSlice';
 
 const TaskDashboard = () => {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const navigate = useNavigate();
 	const location = useLocation();
-
 	const dispatch = useAppDispatch();
+
+	const token = useSelector((state) => state?.auth?.access_token);
+	const userInfoRefetchApi = useSelector((state) => state.userInfo.value);
+
+	const { data, isLoading, error } = useGetUserInfoQuery(undefined, {
+		skip: !token,
+	  });
+
+	  useEffect(() => {
+		if (data) {
+		  dispatch(userInformation(data?.data));
+		}
+	  }, [data, dispatch, userInfoRefetchApi]);
+
 	const handleLogout = () => {
 		dispatch(
 			logout()
@@ -50,6 +67,14 @@ const TaskDashboard = () => {
 						}`}
 					>
 						<ChartCandlestick size={20} className="mr-2" /> Trade
+					</Link>
+					<Link
+						to="/payment"
+						className={`flex items-center text-lg hover:text-gray-400 active:text-blue-600 ${
+							location.pathname === '/payment' ? 'text-gray-400' : ''
+						}`}
+					>
+						<ChartCandlestick size={20} className="mr-2" /> Payment
 					</Link>
 				</nav>
 				<button

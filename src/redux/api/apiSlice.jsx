@@ -104,6 +104,12 @@ export const apiSlice = createApi({
 			}),
 			invalidatesTags: ['closeStocks'],
 		}),
+
+		getUserInfo: builder.query({
+			query: () => ({
+				url: `/user/user-info`,
+			}),
+		}),
 	}),
 });
 
@@ -116,5 +122,6 @@ export const {
 	useStockBuySellMutation,
 	useGetStockQuery,
 	useGetCloseStockQuery,
-	useCloseStockMutation
+	useCloseStockMutation,
+	useGetUserInfoQuery
 } = apiSlice;

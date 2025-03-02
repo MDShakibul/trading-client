@@ -10,6 +10,7 @@ import Otp from './modules/Otp';
 import Forgotpassword from './modules/Forgotpassword';
 import Trade from './page/trade';
 import CryptoChart from './page/CryptoChart';
+import Payment from './page/payment';
 
 const ProtectedRoute = ({ children, auth }) => {
 	const isLoggedIn = localStorage?.getItem('access_token') !== null || true;
@@ -33,6 +34,7 @@ const ProtectedRoute = ({ children, auth }) => {
 				<Route path="/" element={<ProtectedRoute auth={true}><Dashboard /></ProtectedRoute>}>
 					<Route index element={<CryptoChart />} />
 					<Route path="trade" element={<Trade />} /> 
+					<Route path="payment" element={<Payment />} /> 
 				</Route>
 	
 				{/* Sign-in and Sign-up Routes */}
