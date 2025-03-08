@@ -10,7 +10,9 @@ import Otp from './modules/Otp';
 import Forgotpassword from './modules/Forgotpassword';
 import Trade from './page/trade';
 import CryptoChart from './page/CryptoChart';
-import Payment from './page/payment';
+import Payment from './page/payment/payment';
+import Success from './page/payment/success';
+import Cancel from './page/payment/cancel';
 
 const ProtectedRoute = ({ children, auth }) => {
 	const isLoggedIn = localStorage?.getItem('access_token') !== null || true;
@@ -43,6 +45,8 @@ const ProtectedRoute = ({ children, auth }) => {
 				<Route path="/users/otp" element={<Otp />} />
 				<Route path="/users/forgot-password" element={<Forgotpassword isForgotPage={true}/>} />
 				<Route path="/users/reset-password/:token" element={<Forgotpassword isForgotPage={false}/>} />
+				<Route path="/payment/success" element={<ProtectedRoute auth={true}><Success /></ProtectedRoute>} />
+				<Route path="/payment/cancel" element={<ProtectedRoute auth={true}><Cancel /></ProtectedRoute>} />
 			</Routes>
 		);
 	}
