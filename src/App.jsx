@@ -13,6 +13,7 @@ import CryptoChart from './page/CryptoChart';
 import Payment from './page/payment/payment';
 import Success from './page/payment/success';
 import Cancel from './page/payment/cancel';
+import Withdraw from './page/withdraw';
 
 const ProtectedRoute = ({ children, auth }) => {
 	const isLoggedIn = localStorage?.getItem('access_token') !== null || true;
@@ -37,6 +38,7 @@ const ProtectedRoute = ({ children, auth }) => {
 					<Route index element={<CryptoChart />} />
 					<Route path="trade" element={<Trade />} /> 
 					<Route path="payment" element={<Payment />} /> 
+					<Route path="withdrawal" element={<Withdraw />} /> 
 				</Route>
 	
 				{/* Sign-in and Sign-up Routes */}

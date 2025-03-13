@@ -76,6 +76,14 @@ const TaskDashboard = () => {
 					>
 						<ChartCandlestick size={20} className="mr-2" /> Payment
 					</Link>
+					<Link
+						to="/withdrawal"
+						className={`flex items-center text-lg hover:text-gray-400 active:text-blue-600 ${
+							location.pathname === '/payment' ? 'text-gray-400' : ''
+						}`}
+					>
+						<ChartCandlestick size={20} className="mr-2" /> Withdrawal
+					</Link>
 				</nav>
 				<button
 					onClick={handleLogout}
