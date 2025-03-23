@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 
 const Withdraw = () => {
-  const [currency, setCurrency] = useState("ETH");
+  const [currency, setCurrency] = useState("USDTBSC");
   const [amount, setAmount] = useState("50");
   const [address, setAddress] = useState("0x4987014BA298b0ab279121918eE954e275078653");
   //const [payoutId, setPayoutId] = useState("");
