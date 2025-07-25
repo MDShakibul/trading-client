@@ -13,7 +13,7 @@ const Payment = () => {
             const response = await axios.post(
                 "http://localhost:5000/api/v1/payment/create-invoice",
                 {
-                    price_amount: 1000, // $50
+                    price_amount: 2, // $50
                 },
                 {
                     headers: {
